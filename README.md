@@ -1,77 +1,12 @@
-# Hamutea
+# React + Vite
 
-## Setup Instructions
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-### Prerequisites
-- Node.js (v14 or higher)
-- npm or yarn
+Currently, two official plugins are available:
 
-### Installation
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-1. Clone the repository:
-```
-git clone https://github.com/Clarkkentooo/Hamutea-Clean.git
-cd Hamutea-Clean
-```
+## Expanding the ESLint configuration
 
-2. Install dependencies:
-```
-cd hamutea_fe_v2/backend
-npm install
-cd ../frontend
-npm install
-```
-
-### Environment Configuration
-
-Create a `.env` file in the `hamutea_fe_v2/backend` directory with the following variables:
-
-```
-# Server Configuration
-PORT=8080
-NODE_ENV=development
-
-# Database Configuration
-DB_HOST=your_db_host
-DB_USER=your_db_user
-DB_PASSWORD=your_db_password
-DB_NAME=your_db_name
-DB_PORT=your_db_port
-
-# JWT Secret
-JWT_SECRET=your_jwt_secret_key
-JWT_EXPIRES_IN=24h
-
-# Frontend URL
-FRONTEND_URL=http://localhost:5173
-
-# Google OAuth
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-API_URL=http://localhost:8080
-```
-
-### Running the Application
-
-1. Start the backend server:
-```
-cd hamutea_fe_v2/backend
-npm start
-```
-
-2. Start the frontend development server:
-```
-cd hamutea_fe_v2/frontend
-npm run dev
-```
-
-3. Access the application at `http://localhost:5173`
-
-## Features
-- User authentication with Google OAuth
-- Email and SMS verification
-- User profile management
-
-## Security Notes
-- Never commit `.env` files or any files containing sensitive information
-- Always use environment variables for credentials and secrets
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
