@@ -41,7 +41,22 @@ const isAdmin = (req, res, next) => {
   }
 };
 
+/**
+ * Middleware to check if user is a cashier or admin
+ */
+const isCashierOrAdmin = (req, res, next) => {
+  if (req.user && (req.user.role === 'cashier' || req.user.role === 'admin')) {
+    next();
+  } else {
+    return res.status(403).json({ 
+      success: false,
+      message: 'Access denied. Cashier or admin privileges required.' 
+    });
+  }
+};
+
 module.exports = {
   authenticateToken,
-  isAdmin
+  isAdmin,
+  isCashierOrAdmin
 };

@@ -78,7 +78,7 @@ exports.getOrderById = async (req, res) => {
 
 /**
  * Update order status
- * @route PUT /api/orders/:id
+ * @route PUT /api/orders/:id/status
  */
 exports.updateOrderStatus = async (req, res) => {
   try {
@@ -94,7 +94,7 @@ exports.updateOrderStatus = async (req, res) => {
     }
     
     // Validate status value
-    const validStatuses = ['pending', 'processing', 'ready_for_pickup', 'completed', 'cancelled'];
+    const validStatuses = ['pending', 'processing', 'completed', 'cancelled'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
         success: false,

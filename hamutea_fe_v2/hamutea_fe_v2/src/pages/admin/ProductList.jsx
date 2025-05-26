@@ -1,75 +1,61 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '@components/common/Icon';
+import ToggleButton from '@components/common/button/ToggleButton';
+import { useProducts } from '@context/ProductContext';
 
 function ProductList() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { products, categories, loading, error, updateProductAvailability, deleteProduct } = useProducts();
+  const [selectedCategory, setSelectedCategory] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('http://localhost:5000/api/products');
-      const data = await response.json();
-      
-      if (data.success) {
-        setProducts(data.data);
-      } else {
-        setError(data.message || 'Failed to fetch products');
-      }
-    } catch (err) {
-      setError('Error connecting to the server');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Filter products by category
+  const filteredProducts = selectedCategory 
+    ? products.filter(product => product.category === selectedCategory)
+    : products;
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this product?')) {
       return;
     }
+    
+    const success = await deleteProduct(id);
+    if (!success) {
+      alert('Failed to delete product');
+    }
+  };
 
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/products/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        // Remove the deleted product from the state
-        setProducts(products.filter(product => product.id !== id));
-      } else {
-        alert(data.message || 'Failed to delete product');
-      }
-    } catch (err) {
-      alert('Error deleting product');
-      console.error(err);
+  const handleAvailabilityToggle = async (id, isAvailable) => {
+    const success = await updateProductAvailability(id, isAvailable);
+    if (!success) {
+      alert('Failed to update product availability');
     }
   };
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold">Products</h1>
-        <button 
-          onClick={() => navigate('/admin/products/new')}
-          className="bg-hamutea-red hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
-        >
-          <Icon name="Plus" className="w-5 h-5" />
-          Add Product
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <select 
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-hamutea-red"
+          >
+            {categories.map(category => (
+              <option key={category.value} value={category.value}>
+                {category.label}
+              </option>
+            ))}
+          </select>
+          <button 
+            onClick={() => navigate('/admin/products/new')}
+            className="bg-hamutea-red hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2"
+          >
+            <Icon name="Plus" className="w-5 h-5" />
+            Add Product
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -97,10 +83,10 @@ function ProductList() {
                   Price
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stock
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Category
+                </th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Available
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -108,14 +94,14 @@ function ProductList() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {products.length === 0 ? (
+              {filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
                     No products found
                   </td>
                 </tr>
               ) : (
-                products.map((product) => (
+                filteredProducts.map((product) => (
                   <tr key={product.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="h-12 w-12 rounded-md overflow-hidden bg-gray-100">
@@ -139,9 +125,6 @@ function ProductList() {
                       <div className="text-sm text-gray-900">₱{parseFloat(product.price).toFixed(2)}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{product.stock_quantity}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                         ${product.category === 'Classic Milktea Series' ? 'bg-amber-100 text-amber-800' : 
                           product.category === 'Fresh Milk Tea' ? 'bg-blue-100 text-blue-800' : 
@@ -152,19 +135,25 @@ function ProductList() {
                         {product.category}
                       </span>
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <ToggleButton 
+                        isActive={product.is_available !== false} 
+                        onClick={(newState) => handleAvailabilityToggle(product.id, newState)} 
+                      />
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => navigate(`/admin/products/edit/${product.id}`)}
-                          className="text-indigo-600 hover:text-indigo-900"
+                          className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-1.5 rounded-full transition-colors"
                         >
-                          <Icon name="Edit" className="w-5 h-5" />
+                          <Icon name="Edit" className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(product.id)}
-                          className="text-red-600 hover:text-red-900"
+                          className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-1.5 rounded-full transition-colors"
                         >
-                          <Icon name="Trash" className="w-5 h-5" />
+                          <Icon name="Trash" className="w-4 h-4" />
                         </button>
                       </div>
                     </td>

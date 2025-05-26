@@ -11,7 +11,6 @@ function ProductForm() {
     name: '',
     description: '',
     price: '',
-    stock_quantity: '',
     category: '',
     image_url: ''
   });
@@ -22,6 +21,27 @@ function ProductForm() {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const [uploadProgress, setUploadProgress] = useState(0);
+  
+  const [categories, setCategories] = useState([
+    { value: 'Classic Milktea Series', label: 'Classic Milktea Series' },
+    { value: 'Fresh Milk Tea', label: 'Fresh Milk Tea' },
+    { value: 'Fresh Fruit', label: 'Fresh Fruit' },
+    { value: 'Milkshake', label: 'Milkshake' },
+    { value: 'Pure Tea', label: 'Pure Tea' },
+    { value: 'custom', label: 'Add New Category...' }
+  ]);
+  
+  const [customCategory, setCustomCategory] = useState('');
+  const [showCategoryInput, setShowCategoryInput] = useState(false);
+  
+  // Save categories to localStorage whenever they change
+  useEffect(() => {
+    // Only save custom categories (not default ones and not the 'custom' option)
+    const customCategories = categories.filter(c => 
+      !['custom', 'Classic Milktea Series', 'Fresh Milk Tea', 'Fresh Fruit', 'Milkshake', 'Pure Tea', ''].includes(c.value)
+    );
+    localStorage.setItem('productCategories', JSON.stringify(customCategories));
+  }, [categories]);
   
   useEffect(() => {
     if (isEditing) {
@@ -72,9 +92,9 @@ function ProductForm() {
       return;
     }
     
-    // Check file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image size should be less than 5MB');
+    // Check file size (minimum 3MB)
+    if (file.size < 3 * 1024 * 1024) {
+      setError('Image size should be at least 3MB');
       return;
     }
     
@@ -120,6 +140,13 @@ function ProductForm() {
   
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate category
+    if (!formData.category) {
+      setError('Please select a category');
+      return;
+    }
+    
     setSubmitting(true);
     setError(null);
     
@@ -223,7 +250,14 @@ function ProductForm() {
                   type="number"
                   name="price"
                   value={formData.price}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    // Format to always have 2 decimal places
+                    const value = parseFloat(e.target.value).toFixed(2);
+                    setFormData(prev => ({
+                      ...prev,
+                      price: value
+                    }));
+                  }}
                   required
                   min="0"
                   step="0.01"
@@ -232,37 +266,103 @@ function ProductForm() {
               </div>
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Stock Quantity
-              </label>
-              <input
-                type="number"
-                name="stock_quantity"
-                value={formData.stock_quantity}
-                onChange={handleChange}
-                min="0"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-hamutea-red"
-              />
-            </div>
+            {/* Stock Quantity field removed */}
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category
+                Category*
               </label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-hamutea-red"
-              >
-                <option value="">Select Category</option>
-                <option value="Classic Milktea Series">Classic Milktea Series</option>
-                <option value="Fresh Milk Tea">Fresh Milk Tea</option>
-                <option value="Fresh Fruit">Fresh Fruit</option>
-                <option value="Milkshake">Milkshake</option>
-                <option value="Pure Tea">Pure Tea</option>
-              </select>
+              <div>
+                <div className="flex gap-2 mb-2">
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={(e) => {
+                      if (e.target.value === 'custom') {
+                        setShowCategoryInput(true);
+                      } else {
+                        setFormData(prev => ({ ...prev, category: e.target.value }));
+                        setShowCategoryInput(false);
+                      }
+                    }}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-hamutea-red"
+                  >
+                    <option value="" disabled>Select Category</option>
+                    {categories
+                      .filter(category => category.value !== 'custom')
+                      .map(category => (
+                        <option key={category.value} value={category.value}>
+                          {category.label}
+                        </option>
+                      ))}
+                    <option value="custom">Add New Category...</option>
+                  </select>
+                  
+                  {categories.length > 6 && ( // Only show if there are custom categories
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const selectedCategory = formData.category;
+                        if (selectedCategory && selectedCategory !== 'custom' && 
+                            !['Classic Milktea Series', 'Fresh Milk Tea', 'Fresh Fruit', 'Milkshake', 'Pure Tea'].includes(selectedCategory)) {
+                          if (window.confirm(`Remove category "${selectedCategory}"?`)) {
+                            setCategories(prev => prev.filter(c => c.value !== selectedCategory));
+                            setFormData(prev => ({ ...prev, category: '' }));
+                          }
+                        } else {
+                          alert("You can't remove default categories");
+                        }
+                      }}
+                      className="px-3 py-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200"
+                      title="Remove selected category"
+                    >
+                      <Icon name="Trash" className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+                
+                {showCategoryInput && (
+                  <div className="mt-2">
+                    <input
+                      type="text"
+                      placeholder="Enter new category"
+                      value={customCategory}
+                      onChange={(e) => {
+                        setCustomCategory(e.target.value);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-hamutea-red"
+                    />
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (customCategory.trim()) {
+                            const newCategory = { value: customCategory, label: customCategory };
+                            setCategories(prev => [...prev.filter(c => c.value !== customCategory), newCategory]);
+                            setFormData(prev => ({ ...prev, category: customCategory }));
+                            setCustomCategory('');
+                            setShowCategoryInput(false);
+                          }
+                        }}
+                        className="px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200"
+                      >
+                        Add Category
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowCategoryInput(false);
+                          setCustomCategory('');
+                        }}
+                        className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
             
             <div className="md:col-span-2">
@@ -300,7 +400,7 @@ function ProductForm() {
                   </label>
                   
                   <p className="mt-2 text-sm text-gray-500">
-                    JPEG, PNG, or WebP. Max 5MB.
+                    JPEG, PNG, or WebP. Minimum 3MB.
                   </p>
                   
                   {imageFile && (
@@ -318,20 +418,7 @@ function ProductForm() {
                     </div>
                   )}
                   
-                  {/* External image URL option */}
-                  <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Or enter image URL
-                    </label>
-                    <input
-                      type="text"
-                      name="image_url"
-                      value={formData.image_url || ''}
-                      onChange={handleChange}
-                      placeholder="https://example.com/image.jpg"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-hamutea-red"
-                    />
-                  </div>
+                  {/* External image URL option removed */}
                 </div>
               </div>
             </div>

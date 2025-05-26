@@ -4,90 +4,40 @@ import { Select } from "@components/common/input";
 import TeaPlaceholder from "@assets/svg/tea-plchldr.svg";
 import Icon from "@components/common/Icon";
 import { useNavigate } from "react-router-dom";
+import { useProducts } from "@context/ProductContext";
 
 const LatestMenu = () => {
     const navigate = useNavigate();
-    const [products, setProducts] = useState([]);
+    const { products, categories, loading, updateProductAvailability } = useProducts();
     const [selectedCategory, setSelectedCategory] = useState("");
-    const [loading, setLoading] = useState(true);
-    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [filteredProducts, setFilteredProducts] = useState([]);
     const [menuOpen, setMenuOpen] = useState(null);
     
+    // Filter and sort products when products or selectedCategory changes
     useEffect(() => {
-        fetchProducts();
-    }, [selectedCategory]);
-    
-    const fetchProducts = async () => {
-        try {
-            setLoading(true);
-            const url = selectedCategory 
-                ? `http://localhost:5000/api/products?category=${encodeURIComponent(selectedCategory)}`
-                : 'http://localhost:5000/api/products';
-                
-            const response = await fetch(url);
-            const data = await response.json();
+        if (products.length > 0) {
+            // Filter by category if one is selected
+            const filtered = selectedCategory 
+                ? products.filter(p => p.category === selectedCategory)
+                : products;
             
-            if (data.success) {
-                setProducts(data.data.slice(0, 10)); // Show only first 10 products
-            }
-        } catch (error) {
-            console.error('Error fetching products:', error);
-        } finally {
-            setLoading(false);
+            // Sort by newest first (assuming id is incremental)
+            const sorted = [...filtered].sort((a, b) => b.id - a.id);
+            
+            // Take only the latest 8 products
+            const latest = sorted.slice(0, 8);
+            
+            setFilteredProducts(latest);
         }
-    };
+    }, [products, selectedCategory]);
     
-    const toggleAvailability = async (productId) => {
-        try {
-            const token = localStorage.getItem('adminToken');
-            const response = await fetch(`http://localhost:5000/api/products/${productId}/availability`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                setProducts(products.map(product => 
-                    product.id === productId 
-                        ? { ...product, is_available: !product.is_available } 
-                        : product
-                ));
-            }
-        } catch (error) {
-            console.error('Error toggling availability:', error);
-        }
-    };
-    
-    const toggleFeatured = async (productId) => {
-        try {
-            const token = localStorage.getItem('adminToken');
-            const response = await fetch(`http://localhost:5000/api/products/${productId}/featured`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                setProducts(products.map(product => 
-                    product.id === productId 
-                        ? { ...product, is_featured: !product.is_featured } 
-                        : product
-                ));
-            }
-        } catch (error) {
-            console.error('Error toggling featured status:', error);
-        }
+    const handleToggleAvailability = async (productId, isAvailable) => {
+        await updateProductAvailability(productId, isAvailable);
     };
     
     return (
-        <div className="border border-hamutea-border rounded-2xl p-5 w-full">
-            <div className="border-b border-hamutea-border pb-2 flex items-center justify-between gap-10 mb-5">
+        <div className="border border-hamutea-border rounded-2xl p-5 w-full md:w-1/2">
+            <div className="border-b border-hamutea-border pb-2 flex items-center justify-between mb-5">
                 <div>
                     <h1 className="text-xl font-bold">Latest Menu</h1>
                 </div>
@@ -95,32 +45,27 @@ const LatestMenu = () => {
                     variant="danger" 
                     label="View All" 
                     icon="ArrowRight" 
+                    iconAlign="right"
                     onClick={() => navigate('/admin/products')}
                 />
             </div>
-            <Select
-                color="#d91619"
-                placeholder="Category"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                options={[
-                    { value: "", label: "All Categories" },
-                    { value: "Classic Milktea Series", label: "Classic Milktea Series" },
-                    { value: "Fresh Milk Tea", label: "Fresh Milk Tea" },
-                    { value: "Fresh Fruit", label: "Fresh Fruit" },
-                    { value: "Milkshake", label: "Milkshake" },
-                    { value: "Pure Tea", label: "Pure Tea" },
-                ]}
-            />
+            <div className="mt-4 mb-2">
+                <Select
+                    color="#d91619"
+                    placeholder="Category"
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    options={categories}
+                />
+            </div>
 
             <div className="mt-5 w-full max-h-[15.25rem] overflow-y-auto">
                 <table className="w-full text-center">
-                    <thead>
+                    <thead className="border-b border-gray-200">
                         <tr>
-                            <td className="py-3"></td>
-                            <td className="py-3">Menu</td>
-                            <td className="py-3">Price</td>
-                            <td className="py-3">Availability Status</td>
+                            <td className="py-3 text-xs font-medium text-gray-500 uppercase">Menu</td>
+                            <td className="py-3 text-xs font-medium text-gray-500 uppercase">Price</td>
+                            <td className="py-3 text-xs font-medium text-gray-500 uppercase">Status</td>
                         </tr>
                     </thead>
                     <tbody>
@@ -128,59 +73,48 @@ const LatestMenu = () => {
                             <tr>
                                 <td colSpan="4" className="py-5 text-center">Loading...</td>
                             </tr>
-                        ) : products.length === 0 ? (
+                        ) : filteredProducts.length === 0 ? (
                             <tr>
                                 <td colSpan="4" className="py-5 text-center">No products found</td>
                             </tr>
                         ) : (
-                            products.map((product) => (
+                            filteredProducts.map((product) => (
                                 <tr key={product.id}>
                                     <td className="py-3">
-                                        <input 
-                                            type="radio" 
-                                            checked={selectedProduct === product.id}
-                                            onChange={() => setSelectedProduct(product.id)}
-                                        />
-                                    </td>
-                                    <td className="py-3">
-                                        <div className="flex items-center justify-center gap-3">
-                                            <img 
-                                                src={product.image_url || TeaPlaceholder} 
-                                                alt={product.name} 
-                                                className="h-10 w-10 object-cover"
-                                            />
-                                            <p className="text-sm font-bold">{product.name}</p>
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-10 w-10 rounded-md overflow-hidden flex-shrink-0">
+                                                <img 
+                                                    src={product.image_url || TeaPlaceholder} 
+                                                    alt={product.name} 
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            </div>
+                                            <div className="text-left">
+                                                <p className="text-sm font-bold">{product.name}</p>
+                                                <p className="text-xs text-gray-500">{product.category}</p>
+                                            </div>
                                         </div>
                                     </td>
                                     <td className="py-3">
-                                        <p className="text-sm">₱{parseFloat(product.price).toFixed(2)}</p>
+                                        <p className="text-sm font-medium">₱{parseFloat(product.price).toFixed(2)}</p>
                                     </td>
                                     <td className="py-3">
                                         <div className="flex items-center justify-center gap-2">
                                             <ToggleButton 
-                                                isActive={product.is_available} 
-                                                onClick={() => toggleAvailability(product.id)}
+                                                isActive={product.is_available !== false} 
+                                                onClick={(newState) => handleToggleAvailability(product.id, newState)}
                                             />
-                                            <div className="relative">
+                                            <div className="relative ml-2">
                                                 <button 
                                                     onClick={() => setMenuOpen(menuOpen === product.id ? null : product.id)}
-                                                    className="cursor-pointer"
+                                                    className="cursor-pointer p-1 hover:bg-gray-100 rounded-full"
                                                 >
-                                                    <Icon name="Ellipsis" />
+                                                    <Icon name="MoreVertical" className="w-4 h-4" />
                                                 </button>
                                                 
                                                 {menuOpen === product.id && (
-                                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
                                                         <div className="py-1">
-                                                            <button
-                                                                onClick={() => {
-                                                                    toggleFeatured(product.id);
-                                                                    setMenuOpen(null);
-                                                                }}
-                                                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                                            >
-                                                                {product.is_featured ? 'Remove from Featured' : 'Add to Featured'}
-                                                            </button>
                                                             <button
                                                                 onClick={() => {
                                                                     navigate(`/admin/products/edit/${product.id}`);

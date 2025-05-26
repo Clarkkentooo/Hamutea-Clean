@@ -45,6 +45,8 @@ function UserList() {
     // Apply role filter
     if (filter === 'customer') {
       result = result.filter(user => user.role === 'user');
+    } else if (filter === 'cashier') {
+      result = result.filter(user => user.role === 'cashier');
     } else if (filter === 'admin') {
       result = result.filter(user => user.role === 'admin');
     }
@@ -195,6 +197,16 @@ function UserList() {
     setEditMode(false);
     setEditUserId(null);
   };
+  
+  // Helper function to get role display text
+  const getRoleDisplayText = (role) => {
+    switch(role) {
+      case 'admin': return 'Admin';
+      case 'cashier': return 'Cashier';
+      case 'user': return 'Customer';
+      default: return role;
+    }
+  };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this user?')) {
@@ -266,6 +278,18 @@ function UserList() {
                 : 'bg-green-100 text-green-800 hover:bg-green-200'}`}
             >
               Customers
+            </button>
+            <button 
+              onClick={() => {
+                setActiveFilter('cashier');
+                // Keep search query when changing filter
+                if (searchQuery) filterUsers('cashier', searchQuery);
+              }}
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${activeFilter === 'cashier' 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-blue-100 text-blue-800 hover:bg-blue-200'}`}
+            >
+              Cashiers
             </button>
             <button 
               onClick={() => {
@@ -345,9 +369,11 @@ function UserList() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'
+                        user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 
+                        user.role === 'cashier' ? 'bg-blue-100 text-blue-800' :
+                        'bg-green-100 text-green-800'
                       }`}>
-                        {user.role === 'user' ? 'Customer' : 'Admin'}
+                        {getRoleDisplayText(user.role)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -445,6 +471,7 @@ function UserList() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-hamutea-red"
                 >
                   <option value="user">Customer</option>
+                  <option value="cashier">Cashier</option>
                   <option value="admin">Admin</option>
                 </select>
               </div>

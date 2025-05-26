@@ -1,0 +1,6 @@
+<svg width="100" height="60" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100" height="60" rx="8" fill="#0070E0"/>
+  <path d="M25 30C25 22.268 31.268 16 39 16H61C68.732 16 75 22.268 75 30C75 37.732 68.732 44 61 44H39C31.268 44 25 37.732 25 30Z" fill="white"/>
+  <path d="M39 20C33.477 20 29 24.477 29 30C29 35.523 33.477 40 39 40H61C66.523 40 71 35.523 71 30C71 24.477 66.523 20 61 20H39Z" fill="#0070E0"/>
+  <text x="50" y="34" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="white">GCash</text>
+</svg>

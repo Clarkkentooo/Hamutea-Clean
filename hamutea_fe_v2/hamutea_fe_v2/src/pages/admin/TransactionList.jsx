@@ -19,13 +19,13 @@ const TransactionList = () => {
         { id: "TRX-001", customer: "Maria Santos", date: "15 June 2023, 10:30 AM", amount: 150, status: "completed", paymentMethod: "ecash" },
         { id: "TRX-002", customer: "Juan Dela Cruz", date: "14 June 2023, 2:45 PM", amount: 220, status: "completed", paymentMethod: "cash" },
         { id: "TRX-003", customer: "Ana Reyes", date: "14 June 2023, 9:15 AM", amount: 85, status: "completed", paymentMethod: "cash" },
-        { id: "TRX-004", customer: "Carlos Mendoza", date: "13 June 2023, 4:20 PM", amount: 310, status: "refunded", paymentMethod: "ecash" },
+        { id: "TRX-004", customer: "Carlos Mendoza", date: "13 June 2023, 4:20 PM", amount: 310, status: "cancelled", paymentMethod: "ecash" },
         { id: "TRX-005", customer: "Sofia Garcia", date: "12 June 2023, 11:05 AM", amount: 175, status: "completed", paymentMethod: "cash" },
         { id: "TRX-006", customer: "Miguel Torres", date: "11 June 2023, 3:30 PM", amount: 95, status: "failed", paymentMethod: "ecash" },
         { id: "TRX-007", customer: "Isabella Lim", date: "10 June 2023, 1:45 PM", amount: 260, status: "completed", paymentMethod: "ecash" },
         { id: "TRX-008", customer: "Gabriel Santos", date: "9 June 2023, 5:15 PM", amount: 130, status: "completed", paymentMethod: "cash" },
         { id: "TRX-009", customer: "Olivia Reyes", date: "8 June 2023, 12:30 PM", amount: 195, status: "completed", paymentMethod: "cash" },
-        { id: "TRX-010", customer: "Lucas Tan", date: "7 June 2023, 9:45 AM", amount: 280, status: "refunded", paymentMethod: "ecash" }
+        { id: "TRX-010", customer: "Lucas Tan", date: "7 June 2023, 9:45 AM", amount: 280, status: "cancelled", paymentMethod: "ecash" }
       ];
       setTransactions(data);
       setFilteredTransactions(data);
@@ -64,10 +64,10 @@ const TransactionList = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "completed": return "bg-green-100 text-green-800";
-      case "refunded": return "bg-orange-100 text-orange-800";
-      case "failed": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "completed": return "bg-green-100 text-green-800 border border-green-200";
+      case "cancelled": return "bg-red-100 text-red-800 border border-red-200";
+      case "failed": return "bg-red-100 text-red-800 border border-red-200";
+      default: return "bg-gray-100 text-gray-800 border border-gray-200";
     }
   };
 
@@ -138,12 +138,12 @@ const TransactionList = () => {
                 Failed
               </button>
               <button 
-                onClick={() => setActiveFilter('refunded')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${activeFilter === 'refunded' 
-                  ? 'bg-orange-500 text-white' 
-                  : 'bg-orange-100 text-orange-800 hover:bg-orange-200'}`}
+                onClick={() => setActiveFilter('cancelled')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium ${activeFilter === 'cancelled' 
+                  ? 'bg-red-500 text-white' 
+                  : 'bg-red-100 text-red-800 hover:bg-red-200'}`}
               >
-                Refunded
+                Cancelled
               </button>
             </div>
             
@@ -253,7 +253,7 @@ const TransactionList = () => {
                         <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{transaction.id}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{transaction.customer}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{transaction.date}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">₱{transaction.amount}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">₱{transaction.amount.toFixed(2)}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                           <div className="flex items-center gap-2">
                             <Icon name={getPaymentIcon(transaction.paymentMethod)} className="w-4 h-4" />
@@ -261,8 +261,8 @@ const TransactionList = () => {
                           </div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(transaction.status)}`}>
-                            {transaction.status}
+                          <span className={`px-3 py-1.5 inline-flex items-center gap-1.5 text-sm leading-5 font-semibold rounded-full ${getStatusColor(transaction.status)}`}>
+                            {transaction.status === "refunded" ? "Cancelled" : transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
                           </span>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">

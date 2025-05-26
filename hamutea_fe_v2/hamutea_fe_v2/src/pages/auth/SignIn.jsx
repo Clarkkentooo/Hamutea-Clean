@@ -4,6 +4,7 @@ import Circle from '@assets/backgroundimage/circle-desktop.svg';
 import RedBear from '@assets/backgroundimage/redbear.svg';
 import GoogleIcon from '@assets/svg/social/google-icon.svg';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const SignIn = () => {
     const [email, setEmail] = useState('');
@@ -26,7 +27,7 @@ const SignIn = () => {
             setError(null);
             console.log('Attempting login with:', { email, password });
             
-            const response = await fetch('http://localhost:5000/api/auth/login', {
+            const response = await fetch(`${API_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -38,12 +39,25 @@ const SignIn = () => {
             console.log('Login response:', data);
             
             if (data.success) {
-                // Store token and user info
-                localStorage.setItem('adminToken', data.token);
-                localStorage.setItem('adminUser', JSON.stringify(data.data));
-                
-                // Redirect to admin dashboard
-                navigate('/admin/dashboard');
+                // Store token and user info based on role
+                if (data.data.role === 'admin') {
+                    localStorage.setItem('adminToken', data.token);
+                    localStorage.setItem('adminUser', JSON.stringify(data.data));
+                    
+                    // Redirect to admin dashboard
+                    navigate('/admin/dashboard');
+                } else if (data.data.role === 'cashier') {
+                    localStorage.setItem('cashierToken', data.token);
+                    localStorage.setItem('cashierUser', JSON.stringify(data.data));
+                    
+                    // Redirect to cashier orders page
+                    navigate('/cashier/orders');
+                } else {
+                    // Handle regular user login
+                    localStorage.setItem('userToken', data.token);
+                    localStorage.setItem('userData', JSON.stringify(data.data));
+                    navigate('/menu');
+                }
             } else {
                 setError(data.message || 'Login failed. Please check your credentials.');
             }

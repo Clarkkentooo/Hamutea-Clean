@@ -10,6 +10,7 @@ const AdminLayout = () => {
 
     const NAVIGATION = [
         { name: "Dashboard", icon: "ChartColumnBig", path: "/admin/dashboard" },
+        { name: "Analytics", icon: "Activity", path: "/admin/analytics" },
         { name: "Products", icon: "Coffee", path: "/admin/products", highlight: true },
         { name: "Orders", icon: "ShoppingCart", path: "/admin/orders" },
         { name: "Transactions", icon: "ReceiptText", path: "/admin/transactions" },
@@ -76,10 +77,31 @@ const AdminLayout = () => {
                             name="Menu"
                             className="text-hamutea-red w-6 h-6 cursor-pointer lg:hidden block" />
                     </div>
-                    <Link to="/menu" className="inline-flex gap-2 text-hamutea-red cursor-pointer">
-                        Go to the Main Website
-                        <span><Icon name="ArrowRight" /></span>
-                    </Link>
+                    <div className="flex items-center gap-4">
+                        <button 
+                            onClick={() => {
+                              // Store admin token in cashier storage to enable direct access
+                              const adminToken = localStorage.getItem('adminToken');
+                              const adminUser = localStorage.getItem('adminUser');
+                              if (adminToken && adminUser) {
+                                localStorage.setItem('cashierToken', adminToken);
+                                localStorage.setItem('cashierUser', adminUser);
+                                // Navigate to cashier portal
+                                navigate('/cashier/orders');
+                              } else {
+                                alert('Unable to access cashier portal. Please log in again.');
+                              }
+                            }}
+                            className="inline-flex items-center gap-2 bg-hamutea-red text-white px-4 py-2 rounded-lg hover:bg-hamutea-red/90 transition-colors"
+                        >
+                            <Icon name="ShoppingCart" className="w-5 h-5" />
+                            <span>Cashier Portal</span>
+                        </button>
+                        <Link to="/menu" className="inline-flex items-center gap-2 text-hamutea-red hover:text-hamutea-red/80 transition-colors">
+                            <span>Main Website</span>
+                            <Icon name="ArrowRight" className="w-5 h-5" />
+                        </Link>
+                    </div>
                 </div>
 
                 <div className="p-10 flex-1 overflow-y-scroll">

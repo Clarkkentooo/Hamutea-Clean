@@ -1,21 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const orderController = require('../controllers/order.controller');
-const { authenticateToken, isAdmin } = require('../middleware/auth.middleware');
+const { authenticateToken, isAdmin, isCashierOrAdmin } = require('../middleware/auth.middleware');
 
-// All routes require authentication and admin privileges
-router.use(authenticateToken, isAdmin);
+// All routes require authentication
+router.use(authenticateToken);
 
-// Get order statistics
-router.get('/stats', orderController.getOrderStats);
+// Get order statistics - admin only
+router.get('/stats', isAdmin, orderController.getOrderStats);
 
-// Get all orders
-router.get('/', orderController.getAllOrders);
+// Get all orders - cashier or admin
+router.get('/', isCashierOrAdmin, orderController.getAllOrders);
 
-// Get order by ID
-router.get('/:id', orderController.getOrderById);
+// Get order by ID - cashier or admin
+router.get('/:id', isCashierOrAdmin, orderController.getOrderById);
 
-// Update order status
-router.put('/:id', orderController.updateOrderStatus);
+// Update order status - cashier or admin
+router.put('/:id/status', isCashierOrAdmin, orderController.updateOrderStatus);
 
 module.exports = router;

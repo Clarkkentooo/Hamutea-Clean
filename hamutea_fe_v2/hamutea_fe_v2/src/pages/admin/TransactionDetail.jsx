@@ -106,7 +106,7 @@ const TransactionDetail = () => {
                 {transaction.paymentMethod}
               </p>
               <p><span className="font-medium">Reference:</span> {transaction.reference}</p>
-              <p><span className="font-medium">Total Amount:</span> ₱{transaction.amount}</p>
+              <p><span className="font-medium">Total Amount:</span> ₱{transaction.amount.toFixed(2)}</p>
             </div>
           </div>
         </div>
@@ -127,8 +127,8 @@ const TransactionDetail = () => {
                 <tr key={index}>
                   <td className="px-4 py-3 whitespace-nowrap text-sm">{item.name}</td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-center">{item.quantity}</td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right">₱{item.price}</td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right">₱{item.total}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right">₱{item.price.toFixed(2)}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right">₱{item.total.toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
@@ -140,15 +140,15 @@ const TransactionDetail = () => {
             <div className="w-full md:w-1/3">
               <div className="flex justify-between py-2">
                 <span className="font-medium">Subtotal:</span>
-                <span>₱{transaction.subtotal}</span>
+                <span>₱{transaction.subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between py-2">
                 <span className="font-medium">Discount:</span>
-                <span>-₱{transaction.discount}</span>
+                <span>-₱{transaction.discount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between py-2 text-lg font-bold">
                 <span>Total:</span>
-                <span>₱{transaction.total}</span>
+                <span>₱{transaction.total.toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -216,21 +216,21 @@ const TransactionDetail = () => {
                           <tr>
                             <td>${item.name}</td>
                             <td>${item.quantity}</td>
-                            <td>₱${item.price}</td>
-                            <td>₱${item.total}</td>
+                            <td>₱${item.price.toFixed(2)}</td>
+                            <td>₱${item.total.toFixed(2)}</td>
                           </tr>
                         `).join('')}
                         <tr>
                           <td colspan="3" class="total">Subtotal:</td>
-                          <td>₱${transaction.subtotal}</td>
+                          <td>₱${transaction.subtotal.toFixed(2)}</td>
                         </tr>
                         <tr>
                           <td colspan="3" class="total">Discount:</td>
-                          <td>-₱${transaction.discount}</td>
+                          <td>-₱${transaction.discount.toFixed(2)}</td>
                         </tr>
                         <tr>
                           <td colspan="3" class="total">Total:</td>
-                          <td>₱${transaction.total}</td>
+                          <td>₱${transaction.total.toFixed(2)}</td>
                         </tr>
                       </tbody>
                     </table>

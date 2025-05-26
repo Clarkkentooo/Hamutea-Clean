@@ -9,6 +9,8 @@ const db = require('../config/database');
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    
+    console.log('Login attempt:', email); // Debug log
 
     // Validate request
     if (!email || !password) {
@@ -21,6 +23,8 @@ exports.login = async (req, res) => {
     // Check if user exists
     const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
     
+    console.log('User query result:', users.length > 0 ? 'User found' : 'User not found'); // Debug log
+    
     if (users.length === 0) {
       return res.status(401).json({
         success: false,
@@ -29,17 +33,11 @@ exports.login = async (req, res) => {
     }
 
     const user = users[0];
-
-    // Check if user is admin
-    if (user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. Admin privileges required.'
-      });
-    }
+    console.log('User role:', user.role); // Debug log
 
     // Check password
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log('Password valid:', isPasswordValid); // Debug log
     
     if (!isPasswordValid) {
       return res.status(401).json({

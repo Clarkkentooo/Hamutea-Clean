@@ -9,15 +9,16 @@ const Orders = () => {
     const navigate = useNavigate();
     
     return (
-        <div className="border border-hamutea-border rounded-2xl p-5 w-full">
-            <div className="border-b border-hamutea-border pb-2 flex items-center justify-between gap-10 mb-5">
+        <div className="border border-hamutea-border rounded-2xl p-5 w-full md:w-1/2">
+            <div className="border-b border-hamutea-border pb-2 flex items-center justify-between mb-5">
                 <div>
                     <h1 className="text-xl font-bold">Orders</h1>
                 </div>
                 <ActionButton 
                     variant="gray" 
                     label="View All" 
-                    icon="ChevronDown" 
+                    icon="ChevronRight" 
+                    iconAlign="right"
                     onClick={() => navigate('/admin/orders')}
                 />
             </div>
@@ -50,26 +51,26 @@ const Orders = () => {
             <h1 className="text-xl font-bold mb-3">Order Pick-up</h1>
 
             <div className="flex gap-5">
-                <img src={GraphIcon} alt="" className="h-[3.375rem]" />
+                <img src={GraphIcon} alt="Graph icon" className="h-[3.375rem]" />
                 <div className="flex-grow flex items-center">
                     <table className="w-full">
                         <tbody className="text-sm">
-                            <tr>
-                                <td>
+                            <tr className="h-10">
+                                <td className="font-medium text-gray-700 pr-4">
                                     After Order
                                 </td>
-                                <td>
+                                <td className="font-semibold text-right pr-4">
                                     30%
                                 </td>
                                 <td className="w-[50%] relative">
                                     <ProgressBar color="#6a42e3" progress={30} />
                                 </td>
                             </tr>
-                            <tr>
-                                <td>
+                            <tr className="h-10">
+                                <td className="font-medium text-gray-700 pr-4">
                                     Specified Time
                                 </td>
-                                <td>
+                                <td className="font-semibold text-right pr-4">
                                     45%
                                 </td>
                                 <td className="w-[50%] relative">

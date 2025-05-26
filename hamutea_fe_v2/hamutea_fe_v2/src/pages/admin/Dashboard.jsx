@@ -1,78 +1,78 @@
+import PageTitle from "@features/admin/components/PageTitle";
+import Transactions from "@features/admin/dashboard/components/Transactions";
+import InfoCard from "@features/admin/dashboard/components/InfoCard";
+import { SearchInput } from "@components/common/input";
+import Orders from "@features/admin/dashboard/components/Orders";
+import LatestMenu from "@features/admin/dashboard/components/LatestMenu";
+import OrderManagement from "@features/admin/dashboard/components/OrderManagement";
 import { useState, useEffect } from 'react';
-import InfoCard from '@features/admin/dashboard/components/InfoCard';
-import Transactions from '@features/admin/dashboard/components/Transactions';
-import Orders from '@features/admin/dashboard/components/Orders';
-import LatestMenu from '@features/admin/dashboard/components/LatestMenu';
 
-function Dashboard() {
-  const [stats, setStats] = useState({
-    totalOrders: 0,
-    totalRevenue: 0,
-    ordersByStatus: [],
-    recentOrders: []
-  });
-  const [loading, setLoading] = useState(true);
+const Dashboard = () => {
+    const [stats, setStats] = useState({
+        totalOrders: 0,
+        totalRevenue: 0,
+        totalMenus: 0,
+        totalUsers: 0
+    });
+    const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Placeholder for API call
-    // In a real implementation, you would fetch data from your backend
-    setTimeout(() => {
-      setStats({
-        totalOrders: 156,
-        totalRevenue: 12580.50,
-        ordersByStatus: [
-          { status: 'pending', count: 24 },
-          { status: 'processing', count: 42 },
-          { status: 'shipped', count: 58 },
-          { status: 'delivered', count: 28 },
-          { status: 'cancelled', count: 4 }
-        ],
-        recentOrders: [
-          { id: 1, customer_name: 'John Doe', total_amount: 125.50, status: 'delivered', created_at: '2023-06-15' },
-          { id: 2, customer_name: 'Jane Smith', total_amount: 89.99, status: 'shipped', created_at: '2023-06-14' },
-          { id: 3, customer_name: 'Robert Johnson', total_amount: 210.75, status: 'processing', created_at: '2023-06-14' },
-          { id: 4, customer_name: 'Emily Davis', total_amount: 45.25, status: 'pending', created_at: '2023-06-13' },
-          { id: 5, customer_name: 'Michael Brown', total_amount: 178.30, status: 'delivered', created_at: '2023-06-12' }
-        ]
-      });
-      setLoading(false);
-    }, 1000);
-  }, []);
+    useEffect(() => {
+        // Simulate API call
+        setTimeout(() => {
+            setStats({
+                totalOrders: 30,
+                totalRevenue: 10000,
+                totalMenus: 34,
+                totalUsers: 100
+            });
+            setLoading(false);
+        }, 800);
+    }, []);
 
-  return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
-      
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <p>Loading dashboard data...</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {/* Stats Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <InfoCard count={stats.totalOrders} desc="Total Orders" icon="ShoppingCart" color="text-hamutea-red" />
-            <InfoCard count={`₱${stats.totalRevenue.toFixed(2)}`} desc="Total Revenue" icon="Wallet" color="text-hamutea-blue" />
-            <InfoCard count={stats.ordersByStatus.find(o => o.status === 'pending')?.count || 0} desc="Pending Orders" icon="Clock" color="text-hamutea-yellow" />
-            <InfoCard count={stats.ordersByStatus.find(o => o.status === 'delivered')?.count || 0} desc="Delivered Orders" icon="CheckCircle" color="text-hamutea-green" />
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2">
-              <Orders />
+    return (
+        <div className="p-4">
+            <div className="flex flex-col md:flex-row gap-5 justify-between mb-6">
+                <PageTitle title="Dashboard" desc="Here's the Overall Overview of the System" />
+                <SearchInput />
             </div>
-            <div>
-              <Transactions />
-            </div>
-          </div>
-          
-          <div>
-            <LatestMenu />
-          </div>
+            
+            {loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <p className="text-hamutea-gray">Loading dashboard data...</p>
+                </div>
+            ) : (
+                <div className="flex flex-col gap-6">
+                    {/* Info Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <InfoCard icon="CupSoda" count={stats.totalMenus} desc="Total Menus" color="text-hamutea-yellow" />
+                        <InfoCard icon="ReceiptText" count={stats.totalOrders} desc="Total Orders" color="text-hamutea-blue" />
+                        <InfoCard icon="Wallet" count={`₱${stats.totalRevenue}`} desc="Total Revenues" color="text-hamutea-green" />
+                        <InfoCard icon="Users" count={stats.totalUsers} desc="Total Users" color="text-hamutea-red" />
+                    </div>
+                    
+                    {/* Order Management */}
+                    <OrderManagement />
+                    
+                    {/* Main Content */}
+                    <div className="flex flex-col lg:flex-row gap-6">
+                        {/* Left Column */}
+                        <div className="flex-grow flex flex-col gap-6 lg:w-2/3">
+                            <h1 className="text-xl font-bold">Order Summary</h1>
+                            <div className="flex flex-col md:flex-row gap-6">
+                                <Orders />
+                                <LatestMenu />
+                            </div>
+                        </div>
+                        
+                        {/* Right Column */}
+                        <div className="lg:w-1/3 flex-shrink-0">
+                            <Transactions />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 }
 
 export default Dashboard;
